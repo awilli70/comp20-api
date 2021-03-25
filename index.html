@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Bitcoin Price Site</title>
+    <script>
+        // Taken with love with small changes from stackOverflow: https://stackoverflow.com/questions/3066586/
+        // because I hate working with dates and the response did the work for me
+        function yyyymmdd (day) {
+            var mm = day.getMonth() + 1; // getMonth() is zero-based
+            var dd = day.getDate();
+
+            return [day.getFullYear(),
+                    (mm>9 ? '' : '0') + mm,
+                    (dd>9 ? '' : '0') + dd
+                    ].join('-');
+        };
+        var today = new Date;
+        let datestring = yyyymmdd(today);
+        var req = new XMLHttpRequest()
+        req.onreadystatechange = () => {
+            if (req.readyState === 4) {
+                if (req.status === 200) {
+                    obj = JSON.parse(req.responseText);
+                    console.log(obj);
+                    document.getElementById("price").innerHTML = "$" + obj.bpi.USD.rate.slice(0, -2)
+                    document.getElementById("updated").innerHTML = "Updated: " + obj.time.updated
+                    document.getElementById("others").innerHTML = "Other currencies: " + obj.bpi.EUR.rate.slice(0, -2) +" Euros, " + obj.bpi.GBP.rate.slice(0, -2) + " Pounds"
+                } else {
+                    console.log("Request failed with status" + req.status);
+                }
+            }
+        }
+        req.open("GET", "https://api.coindesk.com/v1/bpi/currentprice.json?start=" + 
+                        datestring + "&end=" + datestring);
+        req.send();
+    </script>
+</head>
+<body>
+<h1>Bitcoin Today</h1>
+<h2 id='price'></h2>
+<p id='updated'></p>
+<p id='others'></p>
+<h3>About:</h3>
+<ul>
+    <li>The API used is the Bitcoin Price Index API. By default, upon request it returns the price of Bitcoin for every day over the last 30 days</li>
+    <li>I found the API at <a href='https://www.coindesk.com/coindesk-api' target="_blank">CoinDesk</a>, 
+        through the github public apis list
+    </li>
+    <li>I set the start and end options in this request to the current day, 
+        so it only returned the present day
+    </li>
+    <li>This API could be useful for someone wanting to monitor the current 
+        price of bitcoin (among other crypto currencies), 
+        or for someone trying to find the trend in bitcoin prices
+    </li>
+</ul>
+<p>Powered by <a href='https://www.coindesk.com/price/bitcoin' target="_blank">CoinDesk</a></p>
+</body>
+</html>
